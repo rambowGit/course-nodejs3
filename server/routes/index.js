@@ -53,6 +53,7 @@ router.post('/login', async (req, res, next)=>{
         })(req, res, next)
 })
 
+
 router.get('/refresh-token', async (req, res) => {
     const refreshToken = req.headers['authorization'];
     const data = await token.refreshTokens(refreshToken)
@@ -88,7 +89,7 @@ router.get('/profile', auth, async (req, res) => {
 router.patch('/profile', auth, async (req, res) => {
 
     const {username} = req.user; //from auth middleware
-    const form = formidable({ multiples: true });
+    const form = formidable({ multiples: false });
 
 
     form.parse(req, async (err, fields, files) => {
@@ -97,27 +98,26 @@ router.patch('/profile', auth, async (req, res) => {
         return;
         }
 
-    const user = await db.getUserByName(username);
+        const user = await db.getUserByName(username);
 
-    if (user) {
-        try {
-        const updatedUser = await db.updateUser(username, fields);
+        if (user) {
+            try {
+            const updatedUser = await db.updateUser(username, fields, files);
+            console.log("updatedUser: ", updatedUser );
 
-        if (!updatedUser) {
-            return res.status(400).json({message: 'Не верный пароль!'})
+            if (!updatedUser) {
+                return res.status(400).json({message: 'Не верный пароль!'})
+            }
+            res.status(204).json({
+                ...helper.serializeUser(updatedUser)
+            })
+
+            } catch (e) {
+                console.log(e);
+                res.status(500).json({message: e.message})
+            }
+        
         }
-
-        console.log("updatedUser: ", updatedUser);
-
-        res.status(204).json({
-            ...helper.serializeUser(updatedUser)
-        })
-
-        } catch (e) {
-            console.log(e);
-            res.status(500).json({message: e.message})
-        }
-    }
 
     });    
 
@@ -130,8 +130,9 @@ router.get('/users', async (req, res) => {
         const allUsers = await db.getAllUsers();
 
         if (allUsers) {
-            
-            res.json(allUsers);
+
+            res.json(allUsers.map(u => helper.serializeUser(u)));
+            //res.json(allUsers);
         
         } else {
             console.log("there is no users");
