@@ -1,7 +1,9 @@
 const User = require('./schemas/users');
 const bcrypt = require('bcryptjs');
 
-
+module.exports.getAllUsers = async () => {
+    return User.find();
+}
 
 module.exports.getUserByName = async (username) => {
     return User.findOne({username})

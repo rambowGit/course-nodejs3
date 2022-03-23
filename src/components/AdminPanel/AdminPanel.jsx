@@ -90,7 +90,10 @@ class AdminPanel extends PureComponent {
   handleChangeUser = event => {
     const { users } = this.props;
     const { value } = event.target;
+    console.log("value: ", event);
     const selectedUser = value ? _cloneDeep(users.find(u => u.id === value)) : null;
+    console.log("selectedUser: ",  selectedUser);
+
     this.setState({
       selectedUserId: value,
       selectedUser,

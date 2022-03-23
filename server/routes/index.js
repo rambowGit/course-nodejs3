@@ -122,6 +122,29 @@ router.patch('/profile', auth, async (req, res) => {
     });    
 
 })
+
+
+router.get('/users', async (req, res) => {
+
+    try {
+        const allUsers = await db.getAllUsers();
+
+        if (allUsers) {
+            
+            res.json(allUsers);
+        
+        } else {
+            console.log("there is no users");
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }
+
+  
+})
+
+
   
 
 
