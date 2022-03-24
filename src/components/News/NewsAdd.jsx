@@ -52,6 +52,7 @@ class NewsAdd extends PureComponent {
   render() {
     const { classes } = this.props;
     const { title, text, createdAt, user } = this.state;
+    console.log("front: ", this.state);
     return (
       <Paper
         className={classes.formCard}

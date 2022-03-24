@@ -9,3 +9,14 @@ module.exports.serializeUser = (user) => {
       username: user.username
   }
 }
+
+
+module.exports.serializeNews = (news) => {
+  return {
+      id: news._id,
+      text: news.text,
+      title: news.title,
+      user: news.user
+  }
+}
+

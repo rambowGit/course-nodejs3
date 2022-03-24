@@ -103,7 +103,6 @@ router.patch('/profile', auth, async (req, res) => {
         if (user) {
             try {
             const updatedUser = await db.updateUser(username, fields, files);
-            console.log("updatedUser: ", updatedUser );
 
             if (!updatedUser) {
                 return res.status(400).json({message: 'Не верный пароль!'})
@@ -140,13 +139,148 @@ router.get('/users', async (req, res) => {
     } catch(e){
         console.log(e);
         res.status(500).json({message: e.message});
-    }
-
-  
+    }  
 })
 
 
+router.delete('/users/:id', async (req, res) => {
+
+    try {
+        const id = req.params.id       
+
+        if (id) {
+            await db.deleteUser(id);
+
+            console.log("user " + id + " deleted");
+            
+            res.status(200).json({
+                message: 'Пользователь удален'
+            });
+        
+        } else {
+            return res.status(400).json({
+                message: 'Пользователь не найден'
+            })
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+})
+
+router.patch('/users/:id/permission', auth, async (req, res) => {
+
+    try {
+        const newPermissions = req.body.permission;
+        const id = req.params.id;      
+
+        if (newPermissions) {
+            await db.updatePermission(id, newPermissions);
+
+            res.status(200).json({
+                message: 'Права обновлены'
+            });
+        
+        } else {
+            return res.status(400).json({
+                message: 'Пользователь не найден'
+            })
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+});
+
+
   
+/**
+ * News
+ */
+
+ router.get('/news', async (req, res) => {
+
+    try {
+        const allNews = await db.getAllNews();
+        if (allNews) {
+           res.status(200).json(allNews.map(news => helper.serializeNews(news)));        
+        } else {
+            console.log("there is no newses");
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+});
+
+
+router.post('/news', auth, async (req, res) => {        
+
+    try {
+        const userObj = req.user;
+        const user = userObj.username;
+        const data = req.body;
+        const allNews = await db.createNews(userObj, data);
+
+        if (allNews) {
+
+           res.status(200)
+            .json(allNews
+                .map(news => helper.serializeNews(news)));
+        
+        } else {
+            console.log("there is no newses");
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+})
+
+
+router.patch('/news/:id', async (req, res) => {
+
+    try {
+        const id = req.params.id; 
+        const data = req.body;
+        const allNews = await db.updateNews(id, data);     
+
+        if (allNews) {           
+            
+            res.status(200)
+                .json(allNews.map(news => helper.serializeNews(news)));        
+        } else {
+            return res.status(400).json({
+                message: 'Новость не найдена'
+            })
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+})
+
+
+router.delete('/news/:id', async (req, res) => {
+
+    try {
+        const id = req.params.id;
+        const allNews = await db.deleteNews(id);
+
+        if (allNews) {
+            res.status(200).json(allNews.map(news => helper.serializeNews(news)));   
+        } else {
+            return res.status(400).json({
+                message: 'Новость не найдена'
+            })
+        }
+    } catch(e){
+        console.log(e);
+        res.status(500).json({message: e.message});
+    }  
+})
+
+
 
 
 module.exports = router
